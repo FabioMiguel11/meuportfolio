@@ -6,7 +6,7 @@
 
 //Defines vão aqui, nota ao criar um array com algum define nao esquecer de subtrair 1
 #define MAX_CHARACTERS 50 //50
-#define MAX_EQUIPAS 6 //6, nao se pode definir mais de 29
+#define MAX_EQUIPAS 6 //6, nao se pode definir mais de 54 equipas
 #define MAX_ALUNOSEQUIPA 8 //8
 #define MAX_ATIVIDADESALUNO 5 //5
 #define MAX_ATIVIDADESEQUIPA 8 //8
@@ -33,6 +33,7 @@ typedef struct st_aluno{
 typedef struct st_equipa{
     char sigla[MAX_CHARACTERS+1];
     char localidade[MAX_CHARACTERS+1];
+    aluno alu[MAX_ALUNOSEQUIPA-1];
 }equipa;
 
 //Funções vão aqui
@@ -165,53 +166,9 @@ void apagarAluno(aluno vetAlunos[], int *contadorAlunos)
     }
 }
 
-void escreverAtividade(aluno vetAluno[], int matriz[][MAX_EQUIPAS-1][MAX_EQUIPAS*MAX_ALUNOSEQUIPA-1], int *contadorAlunos, int *contadorAtividades, int *contadorEquipas)
+void escreverAtividade(aluno vetAluno[], int matriz[][MAX_EQUIPAS-1][MAX_EQUIPAS*MAX_ALUNOSEQUIPA-1])
 {
-    //Primeiro verifica-se se todas as regras são seguidas e depois é que se escreve para as estruturas
-    //Primeiro escolhe-se em que aluno vamos escrever
-    int numAluno;
-    //Verifica se ha alunos para mostrar, se houver 0 alunos registados nao vale a pena tentar mostrar
-    if(*contadorAlunos==0)
-    {
-        printf("Nao ha alunos registados. Operacao cancelada");
-        voltarAoMenu();
-    }
-    else
-    {
-        Debug: *contadorEquipas=1;
-        if(*contadorEquipas==0)
-        {
-            printf("Nao ha equipas registadas. Operacao cancelada");
-            voltarAoMenu();
-        }
-        else
-        {
-            printf("Pretende escrever uma atividade a que aluno?Escolha um entre o aluno 1 e o aluno %d\n", *contadorAlunos);
-            do{
-                    printf(">:");
-                    scanf("%d", &numAluno);
-                    //Aqui subtrai-se 1 porque o indice das matrizes começa no 0, o utilizador escolhe o aluno 1 mas o programa tem que ler o indice 0 para obter o aluno 1
-                    numAluno--;
-                    //O fflush está aqui para o caso de ser introduzido em acidente(ou nao) um caracter, permitindo assim a introduçao de um integer
-                    fflush(stdin);
-            }while(numAluno<0 || numAluno>=*contadorAlunos);
-            (*contadorAtividades)++;
-            //Debug: printf("%d %d", *contadorAtividades, MAX_EQUIPAS*MAX_ATIVIDADESEQUIPA);
-            //Aqui verifica se há mais atividades do que há atividades disponiveis
-            if(*contadorAtividades>MAX_EQUIPAS*MAX_ATIVIDADESEQUIPA)
-            {
-                printf("Atingido o valor maximo de atividades tendo em conta o numero de equipas e o numero maximo de atividades por equipa.\nOperacao Cancelada.");
-                voltarAoMenu();
-            }
-            else
-            {
-                //A função verificação verifica se está tudo correto para esse aluno
-                printf("Em que equipa pretende registar a atividade?");
-                
-                voltarAoMenu();
-            }
-        }
-    }
+    voltarAoMenu();
 }
 void mostrarAtividade()
 {
@@ -252,8 +209,14 @@ void listarAlfabeticamente()
 }
 
 /**Funções adicionais não exigidas no enunciado**/
-void criarEquipa()
+void criarEquipa(equipa vetequipas[], int *contarequipas)
 {
+    int i, n;
+    printf("Qual a sigla da equipa %d?\n", *contarequipas+1);
+    gets(vetequipas[*contarequipas].sigla);
+    printf("Qual a localidade da equipa %d?\n", *contarequipas+1);
+    gets(vetequipas[*contarequipas].localidade);
+
     voltarAoMenu();
 }
 
@@ -263,13 +226,12 @@ void voltarAoMenu()
     getchar();
 }
 
-void debug(int *contadorAlunos, int *contadorEquipas)
+void debug(int *contadorAlunos)
 {
     printf("Pode ser registado um numero maximo de %d equipas", MAX_EQUIPAS);
     printf("\nPode ser registados um numero maximo de %d alunos", (MAX_ALUNOSEQUIPA*MAX_EQUIPAS));
-    printf("\nPode haver %d atividades diferentes", (*contadorEquipas*MAX_ATIVIDADESEQUIPA));
+    printf("\nPode haver %d atividades diferentes", (MAX_EQUIPAS*MAX_ATIVIDADESEQUIPA));
     printf("\nHa %d aluno(s) registado(s).", *contadorAlunos);
-    printf("\nHa %d equipa(s) registada(s).", *contadorEquipas);
     voltarAoMenu();
 }
 
@@ -291,25 +253,16 @@ void mostrarAlunosTodos(aluno vetAlunos[], int *contadorAlunos)
     }
 }
 
-/*Esta funcao verifica:
-1- Não há a mesma atividade em equipas diferentes para o mesmo aluno
-2- Não há mais de 5 atividades diferentes no mesmo aluno
-3- Na mesma equipa a soma de todas as atividades de todos os alunos não é superior a 8
-4- Na mesma equipa há menos de 8 alunos*/
-void vericacao(int matriz[][MAX_EQUIPAS-1][MAX_EQUIPAS*MAX_ALUNOSEQUIPA-1])
-{
-
-}
-
 void main()
 {
     short int menu;
-    int contadorAlunos=0, contadorAtividades=0, contadorEquipas=0;
+    int contadorAlunos=0;
+    int contadorEquipas=0;
     //Aqui criamos uma matriz de 1's e 0's que vai guardar a informação de que equipa e que atividade é que um dado aluno está registado
     //O tamanho maximo de X é o numero maximo de atividades, como cada equipa tem no maximo 8 atividades diferentes, o maximo de atividades diferentes sera max equipas * maximo de atividades por equipas(de acordo com o enunciado:6*8=48)
     //O tamanho de Y é o maximo de alunos, logo é igual ao valor previamente definido para o vetor de alunos
     //O tamanho de Z é o maximo de equipas que há(de acordo com o enunciado, 6)
-    int matrizAtividadesEquipaAluno[MAX_EQUIPAS*MAX_ATIVIDADESEQUIPA-1][MAX_EQUIPAS-1][MAX_EQUIPAS*MAX_ALUNOSEQUIPA-1];
+    int matrizAtividadesEquipaAluno[MAX_ALUNOSEQUIPA*MAX_ATIVIDADESEQUIPA-1][MAX_EQUIPAS-1][MAX_EQUIPAS*MAX_ALUNOSEQUIPA-1];
     //Declaração do vetor das 6 equipas e 48 alunos(numero max de equipas*numero maximo de alunos por equipa)
     equipa vetEquipas[MAX_EQUIPAS-1];
     aluno vetAlunos[(MAX_ALUNOSEQUIPA*MAX_EQUIPAS)-1];
@@ -331,7 +284,7 @@ void main()
             case 1: escreverAluno(vetAlunos, &contadorAlunos); menu=0; break;
             case 2: mostrarAluno(vetAlunos, &contadorAlunos); menu=0; break;
             case 3: apagarAluno(vetAlunos, &contadorAlunos); menu=0; break;
-            case 4: escreverAtividade(vetAlunos, matrizAtividadesEquipaAluno, &contadorAlunos, &contadorAtividades, &contadorEquipas); menu=0; break;
+            case 4: escreverAtividade(vetAlunos, matrizAtividadesEquipaAluno); menu=0; break;
             case 5: mostrarAtividade(); menu=0; break;
             case 6: apagarAtividade(); menu=0; break;
             case 7: mostrarAlunosEquipa(); menu=0; break;
@@ -340,8 +293,8 @@ void main()
             case 10: mediaIdadesEquipa(); menu=0; break;
             case 11: menosTempo(); menu=0; break;
             case 12: listarAlfabeticamente(); menu=0; break;
-            case 13: criarEquipa(); menu=0; break;
-            case 14: debug(&contadorAlunos, &contadorEquipas); menu=0; break;
+            case 13: criarEquipa(vetEquipas, &contadorEquipas); menu=0; break;
+            case 14: debug(&contadorAlunos); menu=0; break;
             case 15: mostrarAlunosTodos(vetAlunos, &contadorAlunos); menu=0; break;
             case 16: menu=15; break;
             //O default está aqui se por alguma razão alguma coisa de mal acontecer ao int i o programa voltar ao menu, mas em teoria isto nunca deve correr.
